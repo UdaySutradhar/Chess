@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game</title>
+    <style>
+        /* Center the chessboard */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Chessboard styles */
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-gap: 2px;
+            background-image: url('chessboard.jpg'); /* Background image for the chessboard */
+        }
+
+        .square {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            background-color: transparent; /* Transparent background for squares */
+            cursor: pointer;
+        }
+
+        /* Style for alternating square colors */
+        .even {
+            background-color: #e7b25d;
+        }
+
+        .odd {
+            background-color: #a77c42;
+        }
+
+        .piece {
+            cursor: pointer;
+            color: #333; /* Piece color */
+        }
+
+        .selected {
+            background-color: lightgreen !important;
+        }
+
+        .captured-pieces {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .captured-piece {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            background-color: #eee;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chessboard">
+            <!-- Chessboard squares and pieces will be generated here -->
+        </div>
+    </div>
+    <div class="captured-pieces">
+        <!-- Captured pieces will be displayed here -->
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const chessboard = document.querySelector(".chessboard");
+            const capturedPiecesContainer = document.querySelector(".captured-pieces");
+            let selectedPiece = null;
+
+            // Create the chessboard squares
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement("div");
+                    square.classList.add("square");
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+
+                    square.addEventListener("click", handleSquareClick);
+
+                    // Apply even/odd class for alternating square colors
+                    square.classList.add((row + col) % 2 === 0 ? "even" : "odd");
+
+                    chessboard.appendChild(square);
+                }
+            }
+
+            // Function to create a chess piece
+            function createPiece(symbol, row, col) {
+                const piece = document.createElement("div");
+                piece.className = "piece";
+                piece.textContent = symbol;
+                piece.dataset.row = row;
+                piece.dataset.col = col;
+
+                piece.addEventListener("click", handlePieceClick);
+
+                const square = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                square.appendChild(piece);
+            }
+
+            // Initial chess piece setup
+            const startingPosition = [
+                "♜♞♝♛♚♝♞♜",
+                "♟♟♟♟♟♟♟♟",
+                "        ",
+                "        ",
+                "        ",
+                "        ",
+                "♙♙♙♙♙♙♙♙",
+                "♖♘♗♕♔♗♘♖",
+            ];
+
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const pieceSymbol = startingPosition[row][col];
+                    if (pieceSymbol !== ' ') {
+                        createPiece(pieceSymbol, row, col);
+                    }
+                }
+            }
+
+            // Handle piece click (select/deselect)
+            function handlePieceClick(event) {
+                const piece = event.target;
+                if (selectedPiece === piece) {
+                    // Deselect the piece if it's already selected
+                    selectedPiece = null;
+                    piece.classList.remove("selected");
+                } else {
+                    // Deselect any previously selected piece
+                    if (selectedPiece) {
+                        selectedPiece.classList.remove("selected");
+                    }
+                    selectedPiece = piece;
+                    piece.classList.add("selected");
+                }
+            }
+
+            // Handle square click (move piece)
+            function handleSquareClick(event) {
+                if (selectedPiece) {
+                    const targetSquare = event.target;
+                    const targetPiece = targetSquare.querySelector(".piece");
+
+                    if (!targetPiece || targetPiece !== selectedPiece) {
+                        // Capture the opponent's piece and remove it
+                        if (targetPiece) {
+                            capturedPiecesContainer.appendChild(targetPiece);
+                            targetPiece.remove();
+                        }
+                        targetSquare.appendChild(selectedPiece);
+                    } else {
+                        // Deselect the piece if it's clicked on the same square
+                        selectedPiece.classList.remove("selected");
+                    }
+
+                    selectedPiece = null;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
